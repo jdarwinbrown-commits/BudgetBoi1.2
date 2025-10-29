@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="en" class=""> <!-- 'dark' class will be added here -->
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>BudgetBoi</title>
+  
+  <!-- 1. Load Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- 2. Load Icon Library (Lucide) -->
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+
+  <!-- 3. App Styles -->
+  <style>
+    /* Use the Inter font, which Tailwind loads by default */
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f3f4f6;
+    }
+    
+    /* Dark mode background for the whole page */
+    html.dark body {
+      background-color: #111827; /* gray-900 */
+    }
+    
+    /* Ensure the app container takes up the full height */
+    /* This makes it feel like a native app */
+    html, body, #app-shell {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+    }
+    
+    /* Hide scrollbars for a cleaner look */
+    .hide-scrollbar::-webkit-scrollbar { display: none; }
+    .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  </style>
+</head>
+<body>
+
+  <!-- 
+    This is the main "shell" of the app.
+    It's styled to look like a phone.
+  -->
+  <div id="app-shell" class="w-full max-w-md mx-auto bg-white flex flex-col overflow-hidden sm:my-6 sm:rounded-2xl sm:shadow-2xl dark:bg-gray-900 dark:border dark:border-gray-700">
+    
+    <!-- 
+      This is the content area that will change.
+      Only one "view" will be visible at a time.
+    -->
+    <main class="flex-grow overflow-y-auto hide-scrollbar">
+
+      <!-- ======================= -->
+      <!-- == DASHBOARD VIEW === -->
+      <!-- ======================= -->
+      <div id="view-dashboard" class="p-4 sm:p-6 space-y-6">
+        
+        <!-- Header -->
+        <div class="flex justify-between items-center">
+          <button id="settings-btn" class="text-gray-500 dark:text-gray-400 p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800">
+            <svg data-lucide="settings" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 .53 2.19l-.06.25a2 2 0 0 1-1.6 1.4l-.4.07a2 2 0 0 0-1.73 2.3l.03.26a2 2 0 0 0 1.6 1.73l.43.25a2 2 0 0 1 1 1.73v.18a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.38a2 2 0 0 0-.73-2.73l-.15-.1a2 2 0 0 1-.53-2.19l.06-.25a2 2 0 0 1 1.6-1.4l.4-.07a2 2 0 0 0 1.73-2.3l-.03-.26a2 2 0 0 0-1.6-1.73l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+          <button id="dark-mode-toggle" class="text-gray-500 dark:text-gray-400 p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800">
+            <!-- Sun icon -->
+            <svg id="icon-sun" data-lucide="sun" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="hidden"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+            <!-- Moon icon -->
+            <svg id="icon-moon" data-lucide="moon" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+          </button>
+        </div>
+
+        <h1 class="text-4xl font-bold text-center text-gray-900 dark:text-white -mt-2">
+          BudgetBoi
+        </h1>
+        
+        <!-- Total Card -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-4 sm:p-6">
+          <h2 class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Spent</h2>
+          <p id="total-spent" class="mt-1 text-3xl font-semibold text-gray-900 dark:text-white">$0.00</p>
+        </div>
+        
+        <!-- By Person Chart -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-4 sm:p-6">
+          <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">By Person</h3>
+          <div id="chart-person" class="space-y-3">
+            <!-- JS will fill this -->
+          </div>
+        </div>
+        
+        <!-- By Category Chart -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-4 sm:p-6">
+          <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">By Category</h3>
+          <div id="chart-category" class="space-y-3">
+            <!-- JS will fill this -->
+          </div>
+        </div>
+        
+        <!-- By Month Chart -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-4 sm:p-6">
+          <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">By Month</h3>
+          <div id="chart-month" class="space-y-3">
+            <!-- JS will fill this -->
+          </div>
+        </div>
+        
+        <!-- Recent Expenses -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-4 sm:p-6">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Recent Expenses</h3>
+            <button id="view-all-btn" class="text-sm font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300">
+              View All
+            </button>
+          </div>
+          <div id="recent-expenses-list" class="space-y-4">
+            <!-- JS will fill this -->
+          </div>
+        </div>
+      </div>
+      
+      <!-- ======================= -->
+      <!-- === ADD/EDIT VIEW === -->
+      <!-- ======================= -->
+      <div id="view-add" class="p-4 sm:p-6 hidden">
+        <div class="flex items-center mb-6">
+          <button class="nav-back-btn text-gray-600 dark:text-gray-300 p-2 -ml-2 rounded-full">
+            <svg data-lucide="arrow-left" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
+          </button>
+          <h1 id="add-edit-title" class="text-xl font-semibold text-gray-900 dark:text-white ml-2">Add Expense</h1>
+        </div>
+        
+        <form id="add-edit-form" class="space-y-6">
+          <!-- Hidden input to store the ID of the item being edited -->
+          <input type="hidden" id="editing-id">
+          
+          <div id="form-error" class="p-3 bg-red-100 border border-red-300 text-red-800 rounded-lg hidden">
+            <!-- JS will fill this -->
+          </div>
+          
+          <div>
+            <label for="form-amount" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Amount</label>
+            <div class="mt-1 relative rounded-md shadow-sm">
+              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <span class="text-gray-500 dark:text-gray-400 sm:text-sm">$</span>
+              </div>
+              <input type="number" id="form-amount" class="focus:ring-blue-500 focus:border-blue-500 block w-full pl-7 pr-12 sm:text-sm border-gray-300 rounded-lg py-3 dark:bg-gray-800 dark:border-gray-600 dark:text-white" placeholder="0.00" step="0.01">
+            </div>
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Person</label>
+            <div id="form-person-container" class="mt-2 flex space-x-4">
+              <!-- JS will fill this (e.g., Jarod, Tiana) -->
+            </div>
+          </div>
+          
+          <div>
+            <label for="form-category" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Category</label>
+            <select id="form-category" class="mt-1 block w-full py-3 px-3 border border-gray-300 bg-white rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-800 dark:border-gray-600 dark:text-white">
+              <!-- JS will fill this -->
+            </select>
+          </div>
+          
+          <div>
+            <label for="form-description" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Description (Optional)</label>
+            <input type="text" id="form-description" class="mt-1 block w-full shadow-sm sm:text-sm border-gray-300 rounded-lg py-3 dark:bg-gray-800 dark:border-gray-600 dark:text-white" placeholder="e.g., Coffee, Train ticket">
+          </div>
+          
+          <div>
+            <label for="form-date" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Date</label>
+            <input type="date" id="form-date" class="mt-1 block w-full shadow-sm sm:text-sm border-gray-300 rounded-lg py-3 dark:bg-gray-800 dark:border-gray-600 dark:text-white">
+          </div>
+          
+          <button type="submit" id="form-submit-btn" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700">
+            Save Expense
+          </button>
+        </form>
+      </div>
+      
+      <!-- ======================= -->
+      <!-- === FULL LIST VIEW ==== -->
+      <!-- ======================= -->
+      <div id="view-list" class="hidden">
+        <div class="sticky top-0 z-10 bg-white dark:bg-gray-800 p-4 border-b border-gray-200 dark:border-gray-700 flex items-center">
+          <button class="nav-back-btn text-gray-600 dark:text-gray-300 p-2 -ml-2 rounded-full">
+            <svg data-lucide="arrow-left" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
+          </button>
+          <h1 class="text-xl font-semibold text-gray-900 dark:text-white ml-2">All Expenses</h1>
+        </div>
+        <div id="full-expense-list-container" class="p-4 space-y-4">
+          <!-- JS will fill this -->
+        </div>
+      </div>
+      
+      <!-- ======================= -->
+      <!-- === SETTINGS VIEW ===== -->
+      <!-- ======================= -->
+      <div id="view-settings" class="p-4 sm:p-6 hidden">
+        <div class="flex items-center mb-6">
+          <button class="nav-back-btn text-gray-600 dark:text-gray-300 p-2 -ml-2 rounded-full">
+            <svg data-lucide="arrow-left" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
+          </button>
+          <h1 class="text-xl font-semibold text-gray-900 dark:text-white ml-2">Manage Categories</h1>
+        </div>
+        
+        <div id="category-error" class="p-3 mb-4 bg-red-100 border border-red-300 text-red-800 rounded-lg hidden">
+          <!-- JS will fill this -->
+        </div>
+
+        <form id="add-category-form" class="flex space-x-2 mb-6">
+          <input type="text" id="new-category-name" class="flex-grow block w-full shadow-sm sm:text-sm border-gray-300 rounded-lg py-3 dark:bg-gray-800 dark:border-gray-600 dark:text-white" placeholder="New category name">
+          <button type="submit" class="py-3 px-4 rounded-lg text-sm font-medium text-white bg-blue-600 hover:bg-blue-700">
+            Add
+          </button>
+        </form>
+
+        <div id="category-list-container" class="space-y-2">
+          <!-- JS will fill this -->
+        </div>
+      </div>
+
+    </main>
+    
+    <!-- ======================= -->
+    <!-- === BOTTOM NAV BAR ==== -->
+    <!-- ======================= -->
+    <nav id="bottom-nav" class="flex-shrink-0 w-full flex justify-around items-center p-3 bg-white border-t border-gray-200 dark:bg-gray-800 dark:border-gray-700">
+      
+      <button data-view="dashboard" class="nav-btn flex flex-col items-center justify-center w-24 text-blue-600 dark:text-blue-400">
+        <svg data-lucide="layout-dashboard" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
+        <span class="text-xs mt-1">Dashboard</span>
+      </button>
+      
+      <button data-view="add" class="nav-btn flex flex-col items-center justify-center text-gray-600 dark:text-gray-300 -mt-6" style="transform: translateY(-10px);">
+        <div class="p-3 bg-white dark:bg-gray-800 rounded-full shadow-md">
+          <svg data-lucide="plus-circle" width="32" height="32" class="text-blue-600" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 12h8"/><path d="M12 8v8"/></svg>
+        </div>
+        <span class="text-xs mt-1">Add</span>
+      </button>
+      
+      <button data-view="list" class="nav-btn flex flex-col items-center justify-center w-24 text-gray-500 dark:text-gray-400">
+        <svg data-lucide="list" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" x2="21" y1="6" y2="6"/><line x1="8" x2="21" y1="12" y2="12"/><line x1="8" x2="21" y1="18" y2="18"/><line x1="3" x2="3.01" y1="6" y2="6"/><line x1="3" x2="3.01" y1="12" y2="12"/><line x1="3" x2="3.01" y1="18" y2="18"/></svg>
+        <span class="text-xs mt-1">Expenses</span>
+      </button>
+    </nav>
+
+  </div> <!-- End #app-shell -->
+
+  <!-- ======================= -->
+  <!-- === MAIN APP SCRIPT === -->
+  <!-- ======================= -->
+  <script>
+    // This script runs after the HTML is loaded
+    document.addEventListener('DOMContentLoaded', () => {
+
+      // --- INITIAL STATE ---
+      // All the app's data is stored in this 'state' object
+      let state = {
+        currentView: 'dashboard',
+        isDarkMode: false,
+        people: ['Jarod', 'Tiana'],
+        expenses: [
+          { id: 1, amount: 75.50, category: 'Food', description: 'Groceries', date: '2025-10-01', person: 'Tiana' },
+          { id: 2, amount: 30.00, category: 'Transport', description: 'Bus pass', date: '2025-10-03', person: 'Jarod' },
+          { id: 3, amount: 120.00, category: 'Utilities', description: 'Electric bill', date: '2025-10-05', person: 'Tiana' },
+          { id: 4, amount: 45.00, category: 'Entertainment', description: 'Movie tickets', date: '2025-10-07', person: 'Jarod' },
+          { id: 5, amount: 60.00, category: 'Food', description: 'Dinner out', date: '2025-10-10', person: 'Tiana' },
+          { id: 6, amount: 25.00, category: 'Transport', description: 'Uber', date: '2025-09-15', person: 'Jarod' },
+          { id: 7, amount: 200.00, category: 'Other', description: 'Concert tickets', date: '2025-09-20', person: 'Tiana' },
+          { id: 8, amount: 85.00, category: 'Food', description: 'Weekly Groceries', date: '2025-09-25', person: 'Jarod' },
+        ],
+        categories: ['Food', 'Transport', 'Utilities', 'Entertainment', 'Shopping', 'Other'],
+        editingExpenseId: null,
+      };
+
+      // --- DOM ELEMENTS ---
+      // Get references to all the important HTML elements
+      const appShell = document.getElementById('app-shell');
+      const bottomNav = document.getElementById('bottom-nav');
+      const navButtons = document.querySelectorAll('.nav-btn');
+      const backButtons = document.querySelectorAll('.nav-back-btn');
+      
+      const views = {
+        dashboard: document.getElementById('view-dashboard'),
+        add: document.getElementById('view-add'),
+        list: document.getElementById('view-list'),
+        settings: document.getElementById('view-settings'),
+      };
+      
+      // Dashboard elements
+      const settingsBtn = document.getElementById('settings-btn');
+      const darkModeToggle = document.getElementById('dark-mode-toggle');
+      const iconSun = document.getElementById('icon-sun');
+      const iconMoon = document.getElementById('icon-moon');
+      const totalSpentEl = document.getElementById('total-spent');
+      const chartPerson = document.getElementById('chart-person');
+      const chartCategory = document.getElementById('chart-category');
+      const chartMonth = document.getElementById('chart-month');
+      const recentExpensesList = document.getElementById('recent-expenses-list');
+      const viewAllBtn = document.getElementById('view-all-btn');
+
+      // Add/Edit Form elements
+      const addEditForm = document.getElementById('add-edit-form');
+      const addEditTitle = document.getElementById('add-edit-title');
+      const editingIdEl = document.getElementById('editing-id');
+      const formErrorEl = document.getElementById('form-error');
+      const formAmountEl = document.getElementById('form-amount');
+      const formPersonContainer = document.getElementById('form-person-container');
+      const formCategoryEl = document.getElementById('form-category');
+      const formDescriptionEl = document.getElementById('form-description');
+      const formDateEl = document.getElementById('form-date');
+      const formSubmitBtn = document.getElementById('form-submit-btn');
+
+      // List elements
+      const fullExpenseListContainer = document.getElementById('full-expense-list-container');
+      
+      // Settings elements
+      const categoryErrorEl = document.getElementById('category-error');
+      const addCategoryForm = document.getElementById('add-category-form');
+      const newCategoryNameEl = document.getElementById('new-category-name');
+      const categoryListContainer = document.getElementById('category-list-container');
+
+      // --- HELPER FUNCTIONS ---
+      
+      /**
+       * Formats a number as a USD currency string
+       */
+      const formatCurrency = (num) => `$${num.toFixed(2)}`;
+      
+      /**
+       * Gets a "friendly" date (e.g., October 28, 2025)
+       */
+      const formatDate = (dateString) => {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+          timeZone: 'UTC', // Treat date as UTC
+        });
+      };
+      
+      /**
+       * Gets a category icon
+       */
+      const getCategoryIcon = (category) => {
+        switch (category) {
+          case 'Food': return '🍔';
+          case 'Transport': return '🚗';
+          case 'Utilities': return '💡';
+          case 'Entertainment': return '🎬';
+          case 'Shopping': return '🛍️';
+          default: return '💸';
+        }
+      };
+
+      /**
+       * Main navigation function. Hides all views, shows the one requested.
+       */
+      function navigateTo(viewName) {
+        state.currentView = viewName;
+        
+        // Hide all views
+        Object.values(views).forEach(view => view.classList.add('hidden'));
+        
+        // Show the correct view
+        if (views[viewName]) {
+          views[viewName].classList.remove('hidden');
+        } else {
+          views.dashboard.classList.remove('hidden'); // Fallback
+        }
+        
+        // Show/Hide bottom nav
+        if (viewName === 'add' || viewName === 'settings') {
+          bottomNav.classList.add('hidden');
+        } else {
+          bottomNav.classList.remove('hidden');
+        }
+        
+        // Update nav button active states
+        navButtons.forEach(btn => {
+          const btnView = btn.dataset.view;
+          if (btnView === viewName) {
+            btn.classList.remove('text-gray-500', 'dark:text-gray-400');
+            btn.classList.add('text-blue-600', 'dark:text-blue-400');
+          } else if (btnView !== 'add') { // 'Add' button has special styling
+            btn.classList.add('text-gray-500', 'dark:text-gray-400');
+            btn.classList.remove('text-blue-600', 'dark:text-blue-400');
+          }
+        });
+        
+        // Re-render data if needed
+        if (viewName === 'dashboard') renderDashboard();
+        if (viewName === 'list') renderFullExpenseList();
+        if (viewName === 'settings') renderCategoryList();
+      }
+
+      // --- DATA FUNCTIONS ---
+      
+      /**
+       * Calculates all dashboard data from the state
+       */
+      function getDashboardData() {
+        const expenses = state.expenses;
+        
+        const totalSpent = expenses.reduce((acc, exp) => acc + exp.amount, 0);
+
+        const personMap = new Map();
+        state.people.forEach(p => personMap.set(p, 0));
+        expenses.forEach(exp => {
+          personMap.set(exp.person, (personMap.get(exp.person) || 0) + exp.amount);
+        });
+        const personData = Array.from(personMap.entries())
+          .map(([name, value]) => ({ name, value }))
+          .sort((a, b) => b.value - a.value);
+
+        const categoryMap = new Map();
+        state.categories.forEach(c => categoryMap.set(c, 0));
+        expenses.forEach(exp => {
+          categoryMap.set(exp.category, (categoryMap.get(exp.category) || 0) + exp.amount);
+        });
+        const categoryData = Array.from(categoryMap.entries())
+          .map(([name, value]) => ({ name, value }))
+          .sort((a, b) => b.value - a.value);
+
+        const monthMap = new Map();
+        expenses.forEach(exp => {
+          const month = new Date(exp.date).toLocaleString('default', { month: 'short', year: '2-digit', timeZone: 'UTC' });
+          monthMap.set(month, (monthMap.get(month) || 0) + exp.amount);
+        });
+        const monthData = Array.from(monthMap.entries())
+          .map(([name, value]) => ({ name, value }))
+          .sort((a, b) => new Date(a.name) - new Date(b.name));
+          
+        const recentExpenses = [...expenses]
+          .sort((a, b) => new Date(b.date) - new Date(a.date))
+          .slice(0, 3);
+
+        return { totalSpent, personData, categoryData, monthData, recentExpenses };
+      }
+      
+      /**
+       * Groups all expenses by date for the list view
+       */
+      function getGroupedExpenses() {
+        const sortedExpenses = [...state.expenses].sort((a, b) => new Date(b.date) - new Date(a.date));
+        return sortedExpenses.reduce((acc, exp) => {
+          const date = formatDate(exp.date);
+          if (!acc[date]) acc[date] = [];
+          acc[date].push(exp);
+          return acc;
+        }, {});
+      }
+
+      // --- RENDER FUNCTIONS ---
+      // These functions build HTML strings and put them on the page
+      
+      /**
+       * This is the "main" render function. It calls all the others.
+       */
+      function renderAll() {
+        // We only need to render the current view, but for simplicity
+        // let's just render the dashboard data every time.
+        renderDashboard();
+      }
+
+      /**
+       * Renders a simple CSS bar chart
+       */
+      function renderBarChart(container, data) {
+        container.innerHTML = ''; // Clear old chart
+        const maxValue = Math.max(...data.map(d => d.value));
+        
+        if (data.length === 0 || maxValue === 0) {
+          container.innerHTML = '<p class="text-center text-gray-500 dark:text-gray-400 py-10">No spending data to display.</p>';
+          return;
+        }
+        
+        data.forEach(item => {
+          const percent = (item.value / maxValue) * 100;
+          const barHtml = `
+            <div>
+              <div class="flex justify-between items-center mb-1">
+                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">${item.name}</span>
+                <span class="text-sm font-semibold text-gray-900 dark:text-white">${formatCurrency(item.value)}</span>
+              </div>
+              <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
+                <div class="bg-blue-600 h-2.5 rounded-full" style="width: ${percent}%"></div>
+              </div>
+            </div>
+          `;
+          container.insertAdjacentHTML('beforeend', barHtml);
+        });
+      }
+      
+      /**
+       * Renders the dashboard
+       */
+      function renderDashboard() {
+        const data = getDashboardData();
+        
+        totalSpentEl.textContent = formatCurrency(data.totalSpent);
+        renderBarChart(chartPerson, data.personData);
+        renderBarChart(chartCategory, data.categoryData.filter(d => d.value > 0));
+        renderBarChart(chartMonth, data.monthData);
+        
+        // Render recent expenses
+        recentExpensesList.innerHTML = ''; // Clear
+        if (data.recentExpenses.length === 0) {
+          recentExpensesList.innerHTML = '<p class="text-center text-gray-500 dark:text-gray-400 py-10">No expenses logged yet.</p>';
+        } else {
+          data.recentExpenses.forEach(exp => {
+            recentExpensesList.insertAdjacentHTML('beforeend', renderExpenseItem(exp, false));
+          });
+        }
+      }
+      
+      /**
+       * Renders the full "All Expenses" list
+       */
+      function renderFullExpenseList() {
+        const groupedExpenses = getGroupedExpenses();
+        fullExpenseListContainer.innerHTML = ''; // Clear
+        
+        if (Object.keys(groupedExpenses).length === 0) {
+          fullExpenseListContainer.innerHTML = '<p class="text-center text-gray-500 dark:text-gray-400 py-20">No expenses logged yet.</p>';
+          return;
+        }
+        
+        for (const date in groupedExpenses) {
+          let dateGroupHtml = `
+            <div>
+              <h2 class="text-sm font-semibold text-gray-600 dark:text-gray-400 px-2 my-2">${date}</h2>
+              <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden">
+          `;
+          
+          groupedExpenses[date].forEach((exp, index) => {
+            const isLast = index === groupedExpenses[date].length - 1;
+            dateGroupHtml += renderExpenseItem(exp, true, isLast);
+          });
+          
+          dateGroupHtml += '</div></div>';
+          fullExpenseListContainer.insertAdjacentHTML('beforeend', dateGroupHtml);
+        }
+      }
+      
+      /**
+       * Renders a single expense item
+       */
+      function renderExpenseItem(expense, showMenu, isLast = false) {
+        return `
+          <div class="flex items-center p-4 ${isLast ? '' : 'border-b border-gray-100 dark:border-gray-700'}">
+            <div class="flex-shrink-0 h-10 w-10 rounded-full bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center">
+              <span class="text-lg">${getCategoryIcon(expense.category)}</span>
+            </div>
+            <div class="ml-4 flex-grow">
+              <p class="text-sm font-medium text-gray-900 dark:text-white">${expense.description || expense.category}</p>
+              <p class="text-sm text-gray-500 dark:text-gray-400">${expense.category} &bull; ${expense.person}</p>
+            </div>
+            <div class="text-right">
+              <p class="text-sm font-semibold text-gray-900 dark:text-white">-${formatCurrency(expense.amount)}</p>
+            </div>
+            ${showMenu ? `
+            <div class="ml-2">
+              <button data-id="${expense.id}" class="edit-btn p-1 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700">
+                <svg data-lucide="edit-2" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+              </button>
+              <button data-id="${expense.id}" class="delete-btn p-1 rounded-full text-red-500 hover:bg-red-100 dark:hover:bg-gray-700">
+                <svg data-lucide="trash-2" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
+              </button>
+            </div>
+            ` : ''}
+          </div>
+        `;
+      }
+      
+      /**
+       * Renders the Add/Edit form
+       */
+      function renderForm(expenseToEdit = null) {
+        state.editingExpenseId = expenseToEdit ? expenseToEdit.id : null;
+        formErrorEl.classList.add('hidden');
+        
+        // Fill person radio buttons
+        formPersonContainer.innerHTML = '';
+        state.people.forEach(person => {
+          const checked = (expenseToEdit ? expenseToEdit.person : state.people[0]) === person;
+          formPersonContainer.insertAdjacentHTML('beforeend', `
+            <label class="flex items-center">
+              <input type="radio" name="person" value="${person}" ${checked ? 'checked' : ''} class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 dark:border-gray-600 dark:bg-gray-700">
+              <span class="ml-2 text-sm text-gray-900 dark:text-gray-200">${person}</span>
+            </label>
+          `);
+        });
+        
+        // Fill category select
+        formCategoryEl.innerHTML = '';
+        state.categories.forEach(cat => {
+          const selected = (expenseToEdit && expenseToEdit.category === cat);
+          formCategoryEl.insertAdjacentHTML('beforeend', `
+            <option value="${cat}" ${selected ? 'selected' : ''}>${cat}</option>
+          `);
+        });
+        
+        // Fill form fields
+        if (expenseToEdit) {
+          addEditTitle.textContent = 'Edit Expense';
+          formSubmitBtn.textContent = 'Update Expense';
+          editingIdEl.value = expenseToEdit.id;
+          formAmountEl.value = expenseToEdit.amount;
+          formDescriptionEl.value = expenseToEdit.description;
+          formDateEl.value = expenseToEdit.date;
+          // Category and Person are handled above
+        } else {
+          addEditTitle.textContent = 'Add Expense';
+          formSubmitBtn.textContent = 'Save Expense';
+          addEditForm.reset(); // Clear all fields
+          editingIdEl.value = '';
+          formDateEl.value = new Date().toISOString().split('T')[0];
+        }
+      }
+      
+      /**
+       * Renders the list of categories in Settings
+       */
+      function renderCategoryList() {
+        categoryListContainer.innerHTML = ''; // Clear
+        categoryErrorEl.classList.add('hidden');
+        
+        state.categories.forEach(cat => {
+          const isOther = cat === 'Other';
+          categoryListContainer.insertAdjacentHTML('beforeend', `
+            <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm flex items-center justify-between">
+              <p class="text-gray-900 dark:text-white">${cat}</p>
+              ${!isOther ? `
+              <div class="space-x-1">
+                <button data-name="${cat}" class="delete-category-btn p-2 text-red-500 hover:bg-red-100 dark:hover:bg-gray-700 rounded-full">
+                  <svg data-lucide="trash-2" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
+                </button>
+              </div>
+              ` : ''}
+            </div>
+          `);
+        });
+        // Re-render icons
+        lucide.createIcons();
+      }
+
+      // --- EVENT HANDLERS ---
+      
+      // Handle navigation
+      navButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const viewName = btn.dataset.view;
+          if (viewName === 'add') {
+            renderForm(null); // Show a blank form
+          }
+          navigateTo(viewName);
+        });
+      });
+      
+      backButtons.forEach(btn => {
+        btn.addEventListener('click', () => navigateTo('dashboard'));
+      });
+      
+      viewAllBtn.addEventListener('click', () => navigateTo('list'));
+      settingsBtn.addEventListener('click', () => navigateTo('settings'));
+      
+      // Handle dark mode
+      function setDarkMode(isDark) {
+        state.isDarkMode = isDark;
+        if (isDark) {
+          document.documentElement.classList.add('dark');
+          iconSun.classList.remove('hidden');
+          iconMoon.classList.add('hidden');
+        } else {
+          document.documentElement.classList.remove('dark');
+          iconSun.classList.add('hidden');
+          iconMoon.classList.remove('hidden');
+        }
+        // Re-render charts for dark mode
+        if(state.currentView === 'dashboard') renderDashboard();
+      }
+      
+      darkModeToggle.addEventListener('click', () => {
+        setDarkMode(!state.isDarkMode);
+      });
+      
+      // Handle Add/Edit Form Submit
+      addEditForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        
+        // Get values
+        const id = editingIdEl.value ? parseInt(editingIdEl.value) : Date.now();
+        const amount = parseFloat(formAmountEl.value);
+        const person = document.querySelector('input[name="person"]:checked').value;
+        const category = formCategoryEl.value;
+        const description = formDescriptionEl.value.trim();
+        const date = formDateEl.value;
+        
+        // Validate
+        if (!amount || amount <= 0) {
+          formErrorEl.textContent = 'Please enter a valid amount.';
+          formErrorEl.classList.remove('hidden');
+          return;
+        }
+        if (!date) {
+          formErrorEl.textContent = 'Please select a date.';
+          formErrorEl.classList.remove('hidden');
+          return;
+        }
+        
+        const expenseData = { id, amount, category, description, date, person };
+        
+        if (state.editingExpenseId) {
+          // Update existing
+          state.expenses = state.expenses.map(exp => 
+            exp.id === id ? expenseData : exp
+          );
+        } else {
+          // Add new
+          state.expenses.push(expenseData);
+        }
+        
+        state.editingExpenseId = null;
+        addEditForm.reset();
+        navigateTo('dashboard');
+      });
+      
+      // Handle Expense List clicks (Edit/Delete)
+      // Use event delegation on the container
+      fullExpenseListContainer.addEventListener('click', (e) => {
+        const deleteBtn = e.target.closest('.delete-btn');
+        const editBtn = e.target.closest('.edit-btn');
+        
+        if (deleteBtn) {
+          const id = parseInt(deleteBtn.dataset.id);
+          if (confirm('Are you sure you want to delete this expense?')) {
+            state.expenses = state.expenses.filter(exp => exp.id !== id);
+            renderFullExpenseList(); // Re-render the list
+          }
+        }
+        
+        if (editBtn) {
+          const id = parseInt(editBtn.dataset.id);
+          const expenseToEdit = state.expenses.find(exp => exp.id === id);
+          if (expenseToEdit) {
+            renderForm(expenseToEdit);
+            navigateTo('add');
+          }
+        }
+      });
+      
+      // Handle Settings: Add Category
+      addCategoryForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const newName = newCategoryNameEl.value.trim();
+        
+        if (newName === '') {
+          categoryErrorEl.textContent = 'Category name cannot be empty.';
+          categoryErrorEl.classList.remove('hidden');
+          return;
+        }
+        
+        const exists = state.categories.find(cat => cat.toLowerCase() === newName.toLowerCase());
+        if (exists) {
+          categoryErrorEl.textContent = 'Category already exists.';
+          categoryErrorEl.classList.remove('hidden');
+          return;
+        }
+        
+        state.categories.push(newName);
+        newCategoryNameEl.value = '';
+        categoryErrorEl.classList.add('hidden');
+        renderCategoryList();
+      });
+      
+      // Handle Settings: Delete Category
+      categoryListContainer.addEventListener('click', (e) => {
+        const deleteBtn = e.target.closest('.delete-category-btn');
+        if (deleteBtn) {
+          const name = deleteBtn.dataset.name;
+          if (confirm(`Are you sure you want to delete "${name}"? All expenses in this category will be moved to "Other".`)) {
+            // Re-assign expenses
+            state.expenses = state.expenses.map(exp => {
+              if (exp.category === name) {
+                return { ...exp, category: 'Other' };
+              }
+              return exp;
+            });
+            // Remove category
+            state.categories = state.categories.filter(cat => cat !== name);
+            renderCategoryList();
+          }
+        }
+      });
+
+      // --- INITIALIZE APP ---
+      // Check for system dark mode
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      setDarkMode(prefersDark);
+      
+      // Render all icons
+      lucide.createIcons();
+      
+      // Do the first render
+      navigateTo('dashboard');
+    });
+  </script>
+  
+</body>
+</html>
